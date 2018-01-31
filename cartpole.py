@@ -138,4 +138,6 @@ def simulate():
 
 
 if __name__ == "__main__":
-	simulate()
+	# simulate()
+	print(*env.observation_space.shape)
+	print(*env.action_space.shape)
