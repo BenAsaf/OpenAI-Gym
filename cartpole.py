@@ -1,15 +1,13 @@
 # Special thanks to Matthew Chan @ https://medium.com/@tuzzer/cart-pole-balancing-with-q-learning-b54c6068d947
-# for supplying his solution. I merely modified the code to better understand
-# the basic concept of Reinforcement Learning
+# for supplying his solution. I merely modified the code to understand the basic concept of Reinforcement Learning
 
 import gym
 import numpy as np
 
-
 env = gym.make('CartPole-v1')  # Initialize the "Cart-Pole" environment
 
 # Number of discrete states (bucket) per state dimension
-NUM_BUCKETS = (1, 1, 6, 3)  # (x, x', theta, theta')
+NUM_BUCKETS = (1, 1, 6, 3)  # (x, x', theta, theta'). We not do care much for x and x' and it also helps training time
 NUM_ACTIONS = env.action_space.n  # Number of discrete actions; (left, right)
 
 # Bounds for each discrete state
@@ -40,14 +38,30 @@ def select_action(state, explore_rate):
 
 
 def get_explore_rate(t):
+	"""
+	Calculates the exploration rate for a given episode iteration
+	:param t: Episode iteration
+	:return: Exploration rate
+	"""
 	return np.maximum(MIN_EXPLORE_RATE, np.minimum(1, 1.0 - np.log10((t + 1) / 25)))
 
 
 def get_learning_rate(t):
+	"""
+	Calculates the learning rate for a given episode iteration
+	:param t: Episode iteration
+	:return: Learning rate
+	"""
 	return np.maximum(MIN_LEARNING_RATE, np.minimum(0.5, 1.0 - np.log10((t + 1) / 25)))
 
 
 def normalize(x, i):
+	"""
+	Normalizes given value from observation at index and to the corresponding bin's range.
+	:param x: Value from observation
+	:param i: The index of the value in the observation
+	:return: The value normalized to the bin's range.
+	"""
 	old_min, old_max = STATE_BOUNDS[i].min(), STATE_BOUNDS[i].max()
 	new_min, new_max = BINS_BOUNDS[i].min(), BINS_BOUNDS[i].max()
 	old_range = (old_max - old_min)
@@ -56,6 +70,12 @@ def normalize(x, i):
 
 
 def discretize_state(state):
+	"""
+	Takes an observation from the environment. The observation's values are continuous and we wish to narrow them down
+	into discrete values. Essentially we use bins.
+	:param state: Observation from the environment.
+	:return: Tuple of 4 - Discrete values that is used to access the Q_TABLE
+	"""
 	indices = []
 	for i in range(len(state)):
 		value = state[i]
@@ -66,12 +86,15 @@ def discretize_state(state):
 			idx = NUM_BUCKETS[i] - 1
 		else:
 			raw_idx = normalize(value, i)
-			idx = np.round(raw_idx).astype(np.int)
+			idx = np.round(raw_idx).astype(np.int)  # We round it to the closest bin
 		indices.append(idx)
 	return tuple(indices)
 
 
 def simulate():
+	"""
+	Main function. Runs the environment and the agent.
+	"""
 	discount_factor = 0.99  # Since the world is unchanging
 	num_streaks = 0  # Number of consecutive times of success (More than 199 time steps)
 	for episode in range(NUM_EPISODES):
