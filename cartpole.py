@@ -1,3 +1,7 @@
+# Special thanks to Matthew Chan @ https://medium.com/@tuzzer/cart-pole-balancing-with-q-learning-b54c6068d947
+# for supplying his solution. I merely modified the code to better understand
+# the basic concept of Reinforcement Learning
+
 import gym
 import numpy as np
 
